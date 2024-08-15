@@ -24,7 +24,7 @@ if [ -z "$CERC_REGISTRY_APP_LRN" ]; then
   CERC_REGISTRY_APP_LRN="lrn://$authority/applications/$app"
 fi
 
-APP_RECORD=$(laconic -c $CONFIG_FILE cns name resolve "$CERC_REGISTRY_APP_LRN" | jq '.[0]')
+APP_RECORD=$(laconic -c $CONFIG_FILE registry name resolve "$CERC_REGISTRY_APP_LRN" | jq '.[0]')
 if [ -z "$APP_RECORD" ] || [ "null" == "$APP_RECORD" ]; then
   echo "No record found for $CERC_REGISTRY_APP_LRN."
   exit 1
@@ -36,7 +36,7 @@ record:
   version: 1.0.0
   name: "$rcd_name@$rcd_app_version"
   application: "$CERC_REGISTRY_APP_LRN@$rcd_app_version"
-  dns: "$CERC_REGISTRY_DEPLOYMENT_SHORT_HOSTNAME"
+  dns: "$CERC_REGISTRY_DEPLOYMENT_HOSTNAME"
   deployment: "$CERC_REGISTRY_DEPLOYMENT_LRN"
   config:
     env:
@@ -48,7 +48,7 @@ record:
 EOF
 
 cat $RECORD_FILE
-RECORD_ID=$(laconic -c $CONFIG_FILE cns record publish --filename $RECORD_FILE --user-key "${CERC_REGISTRY_USER_KEY}" --bond-id ${CERC_REGISTRY_BOND_ID} | jq -r '.id')
+RECORD_ID=$(laconic -c $CONFIG_FILE registry record publish --filename $RECORD_FILE --user-key "${CERC_REGISTRY_USER_KEY}" --bond-id ${CERC_REGISTRY_BOND_ID} | jq -r '.id')
 echo $RECORD_ID
 
 rm -f $RECORD_FILE $CONFIG_FILE
