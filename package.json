@@ -1,6 +1,6 @@
 {
   "name": "@cerc-io/webapp-hello-world",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "repository": "https://git.vdb.to/cerc-io/webapp-hello-world",
   "scripts": {
     "dev": "next dev",
