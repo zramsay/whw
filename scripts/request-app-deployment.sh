@@ -24,6 +24,13 @@ if [ -z "$CERC_REGISTRY_APP_LRN" ]; then
   CERC_REGISTRY_APP_LRN="lrn://$authority/applications/$app"
 fi
 
+PAYMENT_TX=$(laconic -c $CONFIG_FILE registry tokens send \
+  --address $CERC_REGISTRY_DEPLOYMENT_REQUEST_PAYMENT_TO \
+  --user-key "${CERC_REGISTRY_DEPLOYMENT_REQUEST_USER_KEY}" \
+  --bond-id "${CERC_REGISTRY_DEPLOYMENT_REQUEST_BOND_ID}" \
+  --type alnt \
+  --quantity ${CERC_REGISTRY_DEPLOYMENT_REQUEST_PAYMENT_AMOUNT:-10000} | jq '.tx.hash')
+
 APP_RECORD=$(laconic -c $CONFIG_FILE registry name resolve "$CERC_REGISTRY_APP_LRN" | jq '.[0]')
 if [ -z "$APP_RECORD" ] || [ "null" == "$APP_RECORD" ]; then
   echo "No record found for $CERC_REGISTRY_APP_LRN."
@@ -38,6 +45,8 @@ record:
   application: "$CERC_REGISTRY_APP_LRN@$rcd_app_version"
   dns: "$CERC_REGISTRY_DEPLOYMENT_HOSTNAME"
   deployment: "$CERC_REGISTRY_DEPLOYMENT_LRN"
+  to: $CERC_REGISTRY_DEPLOYMENT_REQUEST_PAYMENT_TO
+  payment: $PAYMENT_TX
   config:
     env:
       CERC_WEBAPP_DEBUG: "$rcd_app_version"
@@ -47,8 +56,12 @@ record:
     repository_ref: "${GITHUB_SHA:-`git log -1 --format="%H"`}"
 EOF
 
+
 cat $RECORD_FILE
-RECORD_ID=$(laconic -c $CONFIG_FILE registry record publish --filename $RECORD_FILE --user-key "${CERC_REGISTRY_USER_KEY}" --bond-id ${CERC_REGISTRY_BOND_ID} | jq -r '.id')
+RECORD_ID=$(laconic -c $CONFIG_FILE registry record publish \
+  --filename $RECORD_FILE \
+  --user-key "${CERC_REGISTRY_DEPLOYMENT_REQUEST_USER_KEY}" \
+  --bond-id ${CERC_REGISTRY_DEPLOYMENT_REQUEST_BOND_ID} | jq -r '.id')
 echo $RECORD_ID
 
 rm -f $RECORD_FILE $CONFIG_FILE
