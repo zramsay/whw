@@ -11,6 +11,8 @@ rcd_app_version=$(jq -r '.version' package.json | sed 's/null//')
 cat <<EOF > "$CONFIG_FILE"
 services:
   registry:
+    userKey: ${CERC_REGISTRY_DEPLOYMENT_REQUEST_USER_KEY}
+    bondId: ${CERC_REGISTRY_DEPLOYMENT_REQUEST_BOND_ID}
     rpcEndpoint: '${CERC_REGISTRY_RPC_ENDPOINT:-http://testnet-a-1.dev.vaasl.io:26657}'
     gqlEndpoint: '${CERC_REGISTRY_GQL_ENDPOINT:-http://testnet-a-1.dev.vaasl.io:9473/api}'
     chainId: ${CERC_REGISTRY_CHAIN_ID:-laconic-08062024}
