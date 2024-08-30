@@ -1,0 +1,42 @@
+name: Test Encrypted Config
+on:
+  push:
+    branches: '*'
+    paths:
+      - '!**'
+      - '.gitea/workflows/triggers/encrypted'
+
+env:
+  CERC_REGISTRY_USER_KEY: ${{ secrets.CICD_VAASL_LACONIC_USER_KEY }}
+  CERC_REGISTRY_BOND_ID: ${{ secrets.CICD_VAASL_LACONIC_BOND_ID }}
+  CERC_REGISTRY_DEPLOYER_LRN: ${{ vars.CERC_REGISTRY_DEPLOYER_LRN }}
+  CERC_REGISTRY_DEPLOYMENT_HOSTNAME: ${{ vars.CERC_REGISTRY_DEPLOYMENT_HOSTNAME }}-crypt
+  CERC_REGISTRY_DEPLOYMENT_REQUEST_USER_KEY: ${{ secrets.CICD_VAASL_DEPLOYMENT_REQUEST_USER_KEY }}
+  CERC_REGISTRY_DEPLOYMENT_REQUEST_BOND_ID: ${{ secrets.CICD_VAASL_DEPLOYMENT_REQUEST_BOND_ID }}
+  CERC_REGISTRY_DEPLOYMENT_REQUEST_PAYMENT_TO: ${{ secrets.CICD_VAASL_DEPLOYMENT_REQUEST_PAYMENT_TO }}
+
+jobs:
+  cns_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Clone project repository"
+        uses: actions/checkout@v3
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: "Enable Yarn"
+        run: corepack enable
+      - name: "Install registry CLI"
+        run: |
+          npm config set @cerc-io:registry https://git.vdb.to/api/packages/cerc-io/npm/
+          npm install -g @cerc-io/laconic-registry-cli
+      - name: "Install jq and gpg"
+        run: apt -y update && apt -y install jq gpg
+      - name: "Install laconic-so"
+        run: |
+          curl -LO https://git.vdb.to/cerc-io/stack-orchestrator/releases/download/latest/laconic-so
+          chmod +x ./laconic-so
+          mv ./laconic-so /usr/bin/laconic-so
+      - name: "Request Deployment w/ Encrypted Config"
+        run: scripts/request-app-deployment-encrypted.sh
