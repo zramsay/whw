@@ -37,6 +37,7 @@ laconic-so request-webapp-deployment \
   --deployer $CERC_REGISTRY_DEPLOYER_LRN \
   --app $CERC_REGISTRY_APP_LRN \
   --env-file $ENV_FILE \
+  --dns $CERC_REGISTRY_DEPLOYMENT_HOSTNAME \
   --make-payment auto
 
 rm -f $ENV_FILE $CONFIG_FILE
